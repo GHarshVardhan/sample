@@ -1,7 +1,6 @@
 package com.example.sampleapp.di
 
 import com.example.sampleapp.BuildConfig
-import com.example.sampleapp.database.JokesDao
 import com.example.sampleapp.network.ApiHelper
 import com.example.sampleapp.network.ApiHelperImpl
 import com.example.sampleapp.network.ApiService
@@ -9,6 +8,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -19,12 +19,9 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
-    @Provides
-    @Singleton
-    fun provideJokesDao() = JokesDao::class.java
 
     @Provides
-    fun provideBaseUrl() = "https://geek-jokes.sameerkumar.website/"
+    fun provideBaseUrl() = "https://yh-finance.p.rapidapi.com/market/v2/"
 
     @Singleton
     @Provides
@@ -32,13 +29,18 @@ object AppModule {
         val loggingInterceptor = HttpLoggingInterceptor()
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
         OkHttpClient.Builder()
-            .addInterceptor(loggingInterceptor)
-            .build()
-    } else {
-        OkHttpClient
-            .Builder()
-            .build()
-    }
+                .addInterceptor(Interceptor { chain ->
+                    val builder = chain.request().newBuilder()
+                    builder.header("X-RapidAPI-Key", "ce25293794msh4046ae4e0414840p1f5beejsn319e8901f24f")
+                    builder.header("X-RapidAPI-Host", "yh-finance.p.rapidapi.com")
+                    return@Interceptor chain.proceed(builder.build())
+                })
+                .build()
+        } else {
+            OkHttpClient
+                .Builder()
+                .build()
+        }
 
     @Singleton
     @Provides

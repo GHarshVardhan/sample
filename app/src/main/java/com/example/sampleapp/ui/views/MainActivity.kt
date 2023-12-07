@@ -16,14 +16,14 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.sampleapp.businesslogic.MainViewModel
-import com.example.sampleapp.models.JokesResponse
+import com.example.sampleapp.models.Result
 import com.example.sampleapp.ui.theme.SampleAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val mainViewModel: MainViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -33,8 +33,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val list: List<JokesResponse> by mainViewModel.allJokes.observeAsState(listOf())
-                    RecyclerView(jokes = list)
+                    RecyclerView()
                 }
             }
         }
@@ -42,7 +41,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun ListItem(joke: String) {
+fun ListItem(result: Result) {
     Surface(
         color = MaterialTheme.colorScheme.primary,
         modifier = Modifier.padding(16.dp, 16.dp, 16.dp, 0.dp)
@@ -54,18 +53,19 @@ fun ListItem(joke: String) {
         ) {
             Row() {
                 Column(modifier = Modifier.weight(1f)) {
-                   Text(text = joke , style = MaterialTheme.typography.bodyLarge)
+                    result.exchange?.let { Text(text = it, style = MaterialTheme.typography.bodyLarge) }
                 }
             }
         }
     }
 }
 @Composable
-fun RecyclerView(jokes: List<JokesResponse>){
-
+fun RecyclerView(){
+    val mainViewModel: MainViewModel= hiltViewModel()
+    val results: List<Result> by mainViewModel.allResults.observeAsState(listOf())
     LazyColumn(modifier = Modifier.padding(vertical = 4.dp)){
-        items(items = jokes){joke ->
-            ListItem(joke = joke.joke)
+        items(items = results){result ->
+            ListItem(result = result)
         }
     }
 }
@@ -74,6 +74,7 @@ fun RecyclerView(jokes: List<JokesResponse>){
 @Composable
 fun DefaultPreview() {
     SampleAppTheme {
-        
+        val result=Result(exchange = "test")
+        RecyclerView()
     }
 }

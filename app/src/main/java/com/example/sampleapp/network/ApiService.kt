@@ -1,11 +1,11 @@
 package com.example.sampleapp.network
 
-import com.example.sampleapp.models.JokesResponse
 import retrofit2.Response
 import retrofit2.http.GET
+import retrofit2.http.Headers
 
 interface ApiService {
 
-    @GET("api?format=json")
-    suspend fun getJokes(): Response<JokesResponse>
+    @GET("get-summary?region=US/")
+    suspend fun getResponse(): Response<com.example.sampleapp.models.Response>
 }
